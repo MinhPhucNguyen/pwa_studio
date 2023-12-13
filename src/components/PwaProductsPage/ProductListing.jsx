@@ -5,10 +5,14 @@
  *
  */
 import React from 'react';
-import { gql, useQuery } from '@apollo/client';
-import Image from '@magento/venia-ui/lib/components/Image';
+
+import { useQuery } from '@apollo/client';
 import { Link } from 'react-router-dom';
 import { UNCONSTRAINED_SIZE_KEY } from '@magento/peregrine/lib/talons/Image/useImage';
+import { GET_PRODUCTS, GET_STORE_CONFIG_DATA } from './Product.gql';
+import resourceUrl from '@magento/peregrine/lib/util/makeUrl';
+
+import Image from '@magento/venia-ui/lib/components/Image';
 
 const IMAGE_WIDTH = 300;
 const IMAGE_HEIGHT = 375;
@@ -17,32 +21,15 @@ const IMAGE_WIDTHS = new Map()
     .set(320, IMAGE_WIDTH)
     .set(UNCONSTRAINED_SIZE_KEY, 840);
 
-const GET_PRODUCTS = gql`
-    query getProducts($filter: ProductAttributeFilterInput) {
-        products(filter: $filter) {
-            items {
-                id
-                uid
-                name
-                sku
-                show_on_pwa
-                created_at
-                updated_at
-                small_image {
-                    url
-                }
-                price_range {
-                    minimum_price {
-                        final_price {
-                            value
-                            currency
-                        }
-                    }
-                }
-            }
-        }
+const styles = {
+    display: 'flex',
+    flexWrap: 'wrap',
+    marginTop: '50px',
+
+    li: {
+        padding: '20px'
     }
-`;
+};
 
 const ProductListing = () => {
     const { data: PwaProductsListing } = useQuery(GET_PRODUCTS, {
@@ -57,15 +44,12 @@ const ProductListing = () => {
         nextFetchPolicy: 'cache-and-network'
     });
 
-    const styles = {
-        display: 'flex',
-        flexWrap: 'wrap',
-        marginTop: '50px',
+    const { data: storeConfigData } = useQuery(GET_STORE_CONFIG_DATA, {
+        fetchPolicy: 'cache-and-network'
+    });
 
-        li: {
-            padding: '20px'
-        }
-    };
+    const storeConfig = storeConfigData ? storeConfigData.storeConfig : null;
+    const productUrlSuffix = storeConfig && storeConfig.product_url_suffix;
 
     return (
         <div>
@@ -73,49 +57,54 @@ const ProductListing = () => {
             <ul style={styles}>
                 {PwaProductsListing &&
                     PwaProductsListing.products.items.map((item) => {
-                        if (item.show_on_pwa === 1) {
-                            return (
-                                <li key={item.id} style={styles.li}>
-                                    <Link aria-label={item.name}>
-                                        <Image
-                                            style={{ width: '100%' }}
-                                            alt={item.name}
-                                            height={IMAGE_HEIGHT}
-                                            resource={item.small_image.url}
-                                            widths={IMAGE_WIDTHS}
-                                        />
+                        const productUrl = resourceUrl(
+                            `/${item.url_key}${productUrlSuffix || ''}`
+                        );
+
+                        return (
+                            <li key={item.id} style={styles.li}>
+                                <Link to={productUrl} aria-label={item.name}>
+                                    <Image
+                                        style={{ width: '100%' }}
+                                        alt={item.name}
+                                        height={IMAGE_HEIGHT}
+                                        resource={item.small_image.url}
+                                        widths={IMAGE_WIDTHS}
+                                    />
+                                </Link>
+                                <div>
+                                    <p>SKU: {item.sku}</p>
+                                    <Link to={productUrl}>
+                                        <h2>
+                                            <strong>{item.name}</strong>
+                                        </h2>
                                     </Link>
+                                    <p>
+                                        Show On Pwa:{' '}
+                                        {item.show_on_pwa === 1
+                                            ? 'True'
+                                            : 'False'}
+                                    </p>
                                     <div>
-                                        <p>SKU: {item.sku}</p>
-                                        <p>{item.name}</p>
                                         <p>
-                                            Show On Pwa:{' '}
-                                            {item.show_on_pwa === 1
-                                                ? 'True'
-                                                : 'False'}
-                                        </p>
-                                        <div>
-                                            <p>
-                                                <strong>
-                                                    {
-                                                        item.price_range
-                                                            .minimum_price
-                                                            .final_price.value
-                                                    }
-                                                </strong>
-                                            </p>
-                                            <p>
+                                            <strong>
                                                 {
                                                     item.price_range
                                                         .minimum_price
-                                                        .final_price.currency
+                                                        .final_price.value
                                                 }
-                                            </p>
-                                        </div>
+                                            </strong>
+                                        </p>
+                                        <p>
+                                            {
+                                                item.price_range.minimum_price
+                                                    .final_price.currency
+                                            }
+                                        </p>
                                     </div>
-                                </li>
-                            );
-                        }
+                                </div>
+                            </li>
+                        );
                     })}
             </ul>
         </div>
