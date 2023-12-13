@@ -5,20 +5,25 @@
  *
  */
 
-.login-title {
+.signin-title {
     text-align: center;
     font-size: 30px;
     margin-top: 40px;
 }
 
-.login-form {
+.signin-form {
     margin: 0 auto;
     width: 50%;
 }
 
-.login-btn {
+.signin-btn {
     margin-top: 20px;
     text-align: right;
+}
+
+.signin-message {
+    margin-top: 20px;
+    text-align: center;
 }
 
 label {

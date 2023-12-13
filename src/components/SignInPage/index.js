@@ -5,4 +5,4 @@
  *
  */
 
-export { default } from './LoginPage';
+export { default } from './SignInPage';

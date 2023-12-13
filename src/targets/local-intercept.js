@@ -44,9 +44,9 @@ module.exports = (targets) => {
                 )
             },
             {
-                name: 'Login',
-                pattern: '/login/pwa',
-                path: require.resolve('../components/LoginPage/LoginPage.jsx')
+                name: 'SignIn',
+                pattern: '/signin/pwa',
+                path: require.resolve('../components/SignInPage/SignInPage.jsx')
             }
         );
     });
