@@ -21,6 +21,16 @@ export const GET_PRODUCTS = gql`
                     url
                 }
                 price_range {
+                    maximum_price {
+                        final_price {
+                            value
+                            currency
+                        }
+                        regular_price {
+                            value
+                            currency
+                        }
+                    }
                     minimum_price {
                         final_price {
                             value
@@ -28,6 +38,7 @@ export const GET_PRODUCTS = gql`
                         }
                     }
                 }
+                stock_status
             }
         }
     }

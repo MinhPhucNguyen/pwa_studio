@@ -34,6 +34,7 @@ const SignInPage = () => {
     const [SignIn] = useMutation(SIGN_IN);
     const fetchUserDetails = useAwaitQuery(GET_CUSTOMER);
 
+    // hadleSubmit when sign in
     const handleSubmit = async (values) => {
         setSignInMessage('');
         try {

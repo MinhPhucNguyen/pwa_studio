@@ -10,9 +10,11 @@ import { useQuery } from '@apollo/client';
 import { Link } from 'react-router-dom';
 import { UNCONSTRAINED_SIZE_KEY } from '@magento/peregrine/lib/talons/Image/useImage';
 import { GET_PRODUCTS, GET_STORE_CONFIG_DATA } from './Product.gql';
-import resourceUrl from '@magento/peregrine/lib/util/makeUrl';
 
+import resourceUrl from '@magento/peregrine/lib/util/makeUrl';
+import Price from '@magento/venia-ui/lib/components/Price';
 import Image from '@magento/venia-ui/lib/components/Image';
+import AddToCartButton from '@magento/venia-ui/lib/components/Gallery/addToCartButton';
 
 const IMAGE_WIDTH = 300;
 const IMAGE_HEIGHT = 375;
@@ -25,8 +27,13 @@ const styles = {
     display: 'flex',
     flexWrap: 'wrap',
     marginTop: '50px',
-
+    title: {
+        textAlign: 'center',
+        fontSize: '30px',
+        marginTop: '40px'
+    },
     li: {
+        width: '25%',
         padding: '20px'
     }
 };
@@ -53,13 +60,17 @@ const ProductListing = () => {
 
     return (
         <div>
-            <h1>Product Listing</h1>
+            <h1 style={styles.title}>Product Listing</h1>
             <ul style={styles}>
                 {PwaProductsListing &&
                     PwaProductsListing.products.items.map((item) => {
                         const productUrl = resourceUrl(
                             `/${item.url_key}${productUrlSuffix || ''}`
                         );
+
+                        const productPrice =
+                            item.price_range.maximum_price.final_price ||
+                            item.price_range.maximum_price.regular_price;
 
                         return (
                             <li key={item.id} style={styles.li}>
@@ -72,36 +83,22 @@ const ProductListing = () => {
                                         widths={IMAGE_WIDTHS}
                                     />
                                 </Link>
+                                <Link to={productUrl}>
+                                    <span>
+                                        <strong>{item.name}</strong>
+                                    </span>
+                                </Link>
                                 <div>
-                                    <p>SKU: {item.sku}</p>
-                                    <Link to={productUrl}>
-                                        <h2>
-                                            <strong>{item.name}</strong>
-                                        </h2>
-                                    </Link>
-                                    <p>
-                                        Show On Pwa:{' '}
-                                        {item.show_on_pwa === 1
-                                            ? 'True'
-                                            : 'False'}
-                                    </p>
-                                    <div>
-                                        <p>
-                                            <strong>
-                                                {
-                                                    item.price_range
-                                                        .minimum_price
-                                                        .final_price.value
-                                                }
-                                            </strong>
-                                        </p>
-                                        <p>
-                                            {
-                                                item.price_range.minimum_price
-                                                    .final_price.currency
-                                            }
-                                        </p>
-                                    </div>
+                                    <Price
+                                        value={productPrice.value}
+                                        currencyCode={productPrice.currency}
+                                    />
+                                </div>
+                                <div style={{ marginTop: '20px' }}>
+                                    <AddToCartButton
+                                        item={item}
+                                        urlSuffix={productUrlSuffix}
+                                    />
                                 </div>
                             </li>
                         );
