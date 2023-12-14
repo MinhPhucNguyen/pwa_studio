@@ -46,19 +46,15 @@ const SignInPage = () => {
             });
 
             const tokenResponse = signInResponse.generateCustomerToken.token;
-            if (tokenResponse) {
-                getUserDetails({ fetchUserDetails });
-                setToken(tokenResponse);
+            getUserDetails({ fetchUserDetails });
+            setToken(tokenResponse);
 
-                const { data } = await fetchUserDetails({
-                    fetchPolicy: 'cache-only'
-                });
+            const { data } = await fetchUserDetails({
+                fetchPolicy: 'cache-only'
+            });
 
-                setSignInMessage('Sign In successfully');
-                history.push('/account-information');
-            } else {
-                setSignInMessage('Username or password is incorrect');
-            }
+            setSignInMessage('Sign In successfully');
+            history.push('/account-information');
         } catch (error) {
             setSignInMessage(error.message);
         }
